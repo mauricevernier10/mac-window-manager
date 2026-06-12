@@ -18,16 +18,20 @@ swift build -c release
 On first launch, macOS asks you to grant **Accessibility** permission
 (System Settings → Privacy & Security → Accessibility). Grant it and relaunch.
 
-> **Tip:** macOS ties the permission to the binary, so rebuilding can reset
-> it. Copy the release binary to a stable location and run it from there:
->
-> ```sh
-> cp .build/release/WindowManager /usr/local/bin/window-manager
-> window-manager &
-> ```
+## Run in the background / start at login
 
-To start it at login, add the binary in System Settings → General →
-Login Items, or wrap it in a LaunchAgent.
+```sh
+./scripts/install.sh
+```
+
+This builds the app, installs it to `~/.local/bin/window-manager`, and
+registers a LaunchAgent so it runs without a terminal, starts at login, and
+restarts if it crashes. The installed copy is a new binary, so grant it
+Accessibility permission once more when prompted (the script prints the
+exact steps). To remove everything: `./scripts/uninstall.sh`.
+
+After changing shortcuts or pulling updates, just rerun
+`./scripts/install.sh`.
 
 ## Shortcuts
 
