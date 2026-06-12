@@ -80,14 +80,32 @@ final class WindowManager {
     // MARK: - Accessibility
 
     private func focusedWindow() -> AXUIElement? {
-        let systemWide = AXUIElementCreateSystemWide()
-        var appRef: CFTypeRef?
-        guard AXUIElementCopyAttributeValue(systemWide, kAXFocusedApplicationAttribute as CFString, &appRef) == .success,
-              let appRef else { return nil }
+        guard let app = NSWorkspace.shared.frontmostApplication else { return nil }
+        let appElement = AXUIElementCreateApplication(app.processIdentifier)
+
+        // Electron apps (Claude, VS Code, Slack, ...) only build their
+        // accessibility tree on demand; this attribute switches it on.
+        AXUIElementSetAttributeValue(appElement, "AXManualAccessibility" as CFString, kCFBooleanTrue)
+
+        if let window = window(of: appElement) { return window }
+
+        // Chromium (Chrome, Edge, ...) needs the assistive-client flag to
+        // expose windows. Set it and retry once.
+        AXUIElementSetAttributeValue(appElement, "AXEnhancedUserInterface" as CFString, kCFBooleanTrue)
+        return window(of: appElement)
+    }
+
+    private func window(of appElement: AXUIElement) -> AXUIElement? {
         var windowRef: CFTypeRef?
-        guard AXUIElementCopyAttributeValue(appRef as! AXUIElement, kAXFocusedWindowAttribute as CFString, &windowRef) == .success,
-              let windowRef else { return nil }
-        return (windowRef as! AXUIElement)
+        if AXUIElementCopyAttributeValue(appElement, kAXFocusedWindowAttribute as CFString, &windowRef) == .success,
+           let windowRef {
+            return (windowRef as! AXUIElement)
+        }
+        if AXUIElementCopyAttributeValue(appElement, kAXMainWindowAttribute as CFString, &windowRef) == .success,
+           let windowRef {
+            return (windowRef as! AXUIElement)
+        }
+        return nil
     }
 
     private func frame(of window: AXUIElement) -> CGRect? {
@@ -110,12 +128,38 @@ final class WindowManager {
         guard let positionValue = AXValueCreate(.cgPoint, &position),
               let sizeValue = AXValueCreate(.cgSize, &size) else { return }
 
+        // With AXEnhancedUserInterface on (Chromium, or any app while
+        // VoiceOver runs), frame changes get animated and land in the wrong
+        // place. Turn it off for the move and restore it afterwards.
+        let appElement = applicationElement(of: window)
+        let hadEnhancedUI = appElement.map(enhancedUserInterfaceEnabled(for:)) ?? false
+        if hadEnhancedUI, let appElement {
+            AXUIElementSetAttributeValue(appElement, "AXEnhancedUserInterface" as CFString, kCFBooleanFalse)
+        }
+
         // Set position, then size, then position again: some apps clamp the
         // position based on the old size, so a single pass can leave the
         // window in the wrong place.
         AXUIElementSetAttributeValue(window, kAXPositionAttribute as CFString, positionValue)
         AXUIElementSetAttributeValue(window, kAXSizeAttribute as CFString, sizeValue)
         AXUIElementSetAttributeValue(window, kAXPositionAttribute as CFString, positionValue)
+
+        if hadEnhancedUI, let appElement {
+            AXUIElementSetAttributeValue(appElement, "AXEnhancedUserInterface" as CFString, kCFBooleanTrue)
+        }
+    }
+
+    private func applicationElement(of window: AXUIElement) -> AXUIElement? {
+        var pid: pid_t = 0
+        guard AXUIElementGetPid(window, &pid) == .success else { return nil }
+        return AXUIElementCreateApplication(pid)
+    }
+
+    private func enhancedUserInterfaceEnabled(for appElement: AXUIElement) -> Bool {
+        var value: CFTypeRef?
+        guard AXUIElementCopyAttributeValue(appElement, "AXEnhancedUserInterface" as CFString, &value) == .success,
+              let value, CFGetTypeID(value) == CFBooleanGetTypeID() else { return false }
+        return CFBooleanGetValue((value as! CFBoolean))
     }
 }
 
