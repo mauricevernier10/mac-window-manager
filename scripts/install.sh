@@ -48,8 +48,9 @@ launchctl bootstrap "gui/$(id -u)" "$PLIST"
 echo
 echo "Done. WindowManager now runs in the background and starts at login."
 echo
-echo "IMPORTANT: the installed copy is a new binary at a new path, so macOS"
-echo "will ask for Accessibility permission again. Grant it for:"
-echo "  $BINARY"
-echo "(System Settings > Privacy & Security > Accessibility), then run:"
+echo "IMPORTANT: macOS ties Accessibility permission to the binary's content,"
+echo "so EVERY install/update invalidates the previous grant. In the settings"
+echo "pane that just opened, toggle 'window-manager' OFF and back ON (or"
+echo "remove it and re-add $BINARY), then run:"
 echo "  launchctl kickstart -k gui/\$(id -u)/$LABEL"
+open "x-apple.systempreferences:com.apple.preference.security?Privacy_Accessibility"

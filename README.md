@@ -26,12 +26,15 @@ On first launch, macOS asks you to grant **Accessibility** permission
 
 This builds the app, installs it to `~/.local/bin/window-manager`, and
 registers a LaunchAgent so it runs without a terminal, starts at login, and
-restarts if it crashes. The installed copy is a new binary, so grant it
-Accessibility permission once more when prompted (the script prints the
-exact steps). To remove everything: `./scripts/uninstall.sh`.
+restarts if it crashes. To remove everything: `./scripts/uninstall.sh`.
 
-After changing shortcuts or pulling updates, just rerun
-`./scripts/install.sh`.
+After changing shortcuts or pulling updates, rerun `./scripts/install.sh`.
+
+> **Note:** macOS ties the Accessibility grant to the binary's content, so
+> every install/update invalidates it. After each install, toggle
+> `window-manager` off and on in System Settings → Privacy & Security →
+> Accessibility (the script opens that pane for you), then restart it:
+> `launchctl kickstart -k gui/$(id -u)/com.local.window-manager`
 
 ## Shortcuts
 
