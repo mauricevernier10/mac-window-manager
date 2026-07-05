@@ -48,7 +48,7 @@ All shortcuts use **⌃⌥** (Control + Option) as the base modifier.
 | First / Center / Last third | ⌃⌥ D / F / G |
 | First / Last two-thirds | ⌃⌥ E / T |
 | Maximize | ⌃⌥ ↩ |
-| Almost maximize (90%) | ⌃⌥ A |
+| Almost maximize (90%) | ⌃⌥ Space |
 | Maximize height / width | ⌃⌥⇧ ↑ / ⌃⌥⇧ → |
 | Center window | ⌃⌥ C |
 | Make larger / smaller | ⌃⌥ = / ⌃⌥ - |

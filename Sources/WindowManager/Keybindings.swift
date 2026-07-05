@@ -35,7 +35,7 @@ enum Keybindings {
 
         // Maximize & center
         Keybinding(action: .maximize, keyCode: UInt32(kVK_Return), modifiers: hyper),
-        Keybinding(action: .almostMaximize, keyCode: UInt32(kVK_ANSI_A), modifiers: hyper),
+        Keybinding(action: .almostMaximize, keyCode: UInt32(kVK_Space), modifiers: hyper),
         Keybinding(action: .maximizeHeight, keyCode: UInt32(kVK_UpArrow), modifiers: hyperShift),
         Keybinding(action: .maximizeWidth, keyCode: UInt32(kVK_RightArrow), modifiers: hyperShift),
         Keybinding(action: .center, keyCode: UInt32(kVK_ANSI_C), modifiers: hyper),
