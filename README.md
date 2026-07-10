@@ -51,7 +51,7 @@ All shortcuts use **⌃⌥** (Control + Option) as the base modifier.
 | Almost maximize (90%) | ⌃⌥ Space |
 | Maximize height / width | ⌃⌥⇧ ↑ / ⌃⌥⇧ → |
 | Center window | ⌃⌥ C |
-| Make larger / smaller | ⌃⌥ = / ⌃⌥ - |
+| Grow / shrink by 10% of screen (25%–100%) | ⌃⌥ + / ⌃⌥ - |
 | Next / Previous display | ⌃⌥⌘ → / ⌃⌥⌘ ← |
 | Restore previous size | ⌃⌥ ⌫ |
 

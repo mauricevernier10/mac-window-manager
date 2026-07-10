@@ -36,7 +36,6 @@ enum WindowAction {
     /// Returns nil for actions that don't resolve to a frame on the current
     /// screen (display moves and restore are handled by the caller).
     func targetFrame(window: CGRect, screen: CGRect) -> CGRect? {
-        let resizeStep: CGFloat = 60
         let halfW = screen.width / 2
         let halfH = screen.height / 2
         let thirdW = screen.width / 3
@@ -84,10 +83,9 @@ enum WindowAction {
             return CGRect(x: screen.midX - window.width / 2, y: screen.midY - window.height / 2, width: window.width, height: window.height)
 
         case .makeLarger:
-            return window.insetBy(dx: -resizeStep, dy: -resizeStep).clamped(to: screen)
+            return window.resized(byScreenFraction: 0.1, on: screen)
         case .makeSmaller:
-            let shrunk = window.insetBy(dx: resizeStep, dy: resizeStep)
-            return shrunk.width > 200 && shrunk.height > 200 ? shrunk : window
+            return window.resized(byScreenFraction: -0.1, on: screen)
 
         case .nextDisplay, .previousDisplay, .restore:
             return nil
@@ -96,6 +94,20 @@ enum WindowAction {
 }
 
 extension CGRect {
+    /// Grows or shrinks the rect by `fraction` of the screen's dimensions
+    /// (e.g. 0.1 = one 10% step), keeping it centered on its current
+    /// position. Size is capped at 100% of the screen and floored at 25%.
+    func resized(byScreenFraction fraction: CGFloat, on screen: CGRect) -> CGRect {
+        let newWidth = min(max(width + screen.width * fraction, screen.width * 0.25), screen.width)
+        let newHeight = min(max(height + screen.height * fraction, screen.height * 0.25), screen.height)
+        return CGRect(
+            x: midX - newWidth / 2,
+            y: midY - newHeight / 2,
+            width: newWidth,
+            height: newHeight
+        ).clamped(to: screen)
+    }
+
     /// Clamps the rect so it fits inside `bounds`, shrinking it if necessary.
     func clamped(to bounds: CGRect) -> CGRect {
         var rect = self
