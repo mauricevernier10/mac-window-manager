@@ -13,7 +13,19 @@ enum Keybindings {
     private static let hyperShift = UInt32(controlKey | optionKey | shiftKey)
     private static let hyperCmd = UInt32(controlKey | optionKey | cmdKey)
 
-    static let defaults: [Keybinding] = [
+    static var defaults: [Keybinding] {
+        // Resolve the +/- keys from the active keyboard layout: their
+        // physical positions differ between layouts (US, QWERTZ, AZERTY, ...).
+        // On US layouts "+" is shift+"=", so "=" is the unshifted fallback.
+        let plusKey = KeyCodeResolver.keyCode(forAnyOf: ["+", "="]) ?? UInt32(kVK_ANSI_Equal)
+        let minusKey = KeyCodeResolver.keyCode(forAnyOf: ["-"]) ?? UInt32(kVK_ANSI_Minus)
+        return staticBindings + [
+            Keybinding(action: .makeLarger, keyCode: plusKey, modifiers: hyper),
+            Keybinding(action: .makeSmaller, keyCode: minusKey, modifiers: hyper),
+        ]
+    }
+
+    private static let staticBindings: [Keybinding] = [
         // Halves: ⌃⌥ + arrows
         Keybinding(action: .leftHalf, keyCode: UInt32(kVK_LeftArrow), modifiers: hyper),
         Keybinding(action: .rightHalf, keyCode: UInt32(kVK_RightArrow), modifiers: hyper),
@@ -39,10 +51,6 @@ enum Keybindings {
         Keybinding(action: .maximizeHeight, keyCode: UInt32(kVK_UpArrow), modifiers: hyperShift),
         Keybinding(action: .maximizeWidth, keyCode: UInt32(kVK_RightArrow), modifiers: hyperShift),
         Keybinding(action: .center, keyCode: UInt32(kVK_ANSI_C), modifiers: hyper),
-
-        // Resize
-        Keybinding(action: .makeLarger, keyCode: UInt32(kVK_ANSI_Equal), modifiers: hyper),
-        Keybinding(action: .makeSmaller, keyCode: UInt32(kVK_ANSI_Minus), modifiers: hyper),
 
         // Displays: ⌃⌥⌘ + arrows
         Keybinding(action: .nextDisplay, keyCode: UInt32(kVK_RightArrow), modifiers: hyperCmd),
